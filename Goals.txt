@@ -1,0 +1,6 @@
+These are the overall goals I have for jMARS.
+
+Provide a nice GUI application for people to run and debug their warriors in.
+Provide an applet that can be used to run warriors on the WWW.
+Provide an easy framework for people to experiment with extensions to redcode.
+Provide a base that people can easily adapt for use with GA or other means of computer generated warriors.

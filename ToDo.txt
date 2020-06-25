@@ -1,0 +1,5 @@
+Things to do more or less in the order I'm working on them:
+
+get an assembler that handles 94 draft+pmars extensions
+add a way to view and modify instruction in core
+verify the correct operation of the marsVM

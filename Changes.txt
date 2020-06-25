@@ -1,0 +1,47 @@
+Added the start of a compiler for full ICWS94 w/ pmars extensions.
+
+Added addConstant(String, String) to the assembler interface so predefined
+equates can be set.
+
+Added parseWarrior(InputStream) to the assembler interface so multiple 
+warriors can be parsed with one instance.
+
+Created VM interface.
+
+Moved repaint command into frontend components, this fixed the problem with
+the CoreDisplay in jdk 1.3.0 not refreshing properly. It did cause about a 25%
+slow down though.
+
+Moved Memory class to corewars.jmars package.
+
+Created Assembler interface and renamed old assembler to Simple.
+
+Moved WarriorObj class from marsVM package to corewars.jmars.
+
+Assembler now correctly sets default modifier.
+
+0.01 -> 0.02
+Added a Memory.equals(Object) method so it will correctly handle the case where
+it is called with a Memory object that is referenced by an Object reference (is
+that confusing enough). Carter Cheng pointed out the need for this. Thanks 
+Carter.
+
+Added several new interfaces to the frontend changing interaction with it to an
+event style interface. This provides alot more flexibility but caused a huge
+slow down so I may abandon it in the future if it doesn't provide enough of an 
+advantage.
+
+Changed the StatReport class to StepReport and all classes that referenced it, 
+moved to the frontend package.
+
+Changed the CoreDisplay to implement the new StepListener interface.
+
+Added the RoundCycleCounter class.
+
+0.0 -> 0.01
+Cleaned up code to a common style in all packages except for assembler (plan on 
+completely replacing it in a future release)
+
+Added javadoc comments to all classes and functions
+
+Changed the round/cycle indicator to a label
