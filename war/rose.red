@@ -1,7 +1,7 @@
 ;name Rose
 
        ORG      0
-  MOV.I  $    17, @     7     
+       MOV.I  $    17, @     7     
        MOV.I  {    14, {     6     
        MOV.I  {    13, {     5     
        MOV.I  {    12, {     4     

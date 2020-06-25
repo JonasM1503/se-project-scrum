@@ -2,7 +2,7 @@
 ;author P.Kline
 
        ORG      0
-  MOV.I  <     6, {     6     
+       MOV.I  <     6, {     6     
        MOV.I  <     5, {     5     
        MOV.I  <     4, {     4     
        MOV.I  <     3, {     3     
