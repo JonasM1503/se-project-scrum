@@ -89,6 +89,11 @@ public class jMARS extends Panel implements Runnable, FrontEndManager {
             System.out.println("usage: jMARS [options] warrior1.red [warrior2.red ...]");
             return;
         }
+        createFrame(args);
+
+    }
+
+    static void createFrame(String[] args) {
         Frame myFrame = new Frame("jMARS");
         myFrame.setSize(new Dimension(1200, 900));
         jMARS myApp = new jMARS();
