@@ -82,6 +82,7 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
      * @param args java.lang.String[] a - array of command line arguments
      */
     public static void main(String args[]) {
+
         if (args.length == 0) {
             System.out.println("usage: jMARS [options] warrior1.red [warrior2.red ...]");
             return;
@@ -103,15 +104,8 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
 
         Vector wArgs = configurationSingleton.setAllConfigurations(args);
 
-        Assembler parser = new corewars.jmars.assembler.icws94p.ICWS94p();
-        parser.addConstant("coresize", Integer.toString(configurationSingleton.getCoreSize()));
-        parser.addConstant("maxprocesses", Integer.toString(configurationSingleton.getMaxProc()));
-        parser.addConstant("maxcycles", Integer.toString(configurationSingleton.getCoreSize()));
-        parser.addConstant("maxlength", Integer.toString(configurationSingleton.getMaxWarriorLength()));
-        parser.addConstant("mindistance", Integer.toString(configurationSingleton.getMinWarriorDistance()));
-        parser.addConstant("rounds", Integer.toString(configurationSingleton.getRounds()));
-        parser.addConstant("pspacesize", Integer.toString(configurationSingleton.getpSpaceSize()));
-        parser.addConstant("warriors", Integer.toString(configurationSingleton.getNumWarriors()));
+        Assembler parser = initParser();
+
         allWarriors = new WarriorObj[configurationSingleton.getNumWarriors()];
 
         for (int i = 0; i < configurationSingleton.getNumWarriors(); i++) {
@@ -159,52 +153,92 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
         return;
     }
 
+    private Assembler initParser(){
+        Assembler parser = new corewars.jmars.assembler.icws94p.ICWS94p();
+        parser.addConstant("coresize", Integer.toString(configurationSingleton.getCoreSize()));
+        parser.addConstant("maxprocesses", Integer.toString(configurationSingleton.getMaxProc()));
+        parser.addConstant("maxcycles", Integer.toString(configurationSingleton.getCoreSize()));
+        parser.addConstant("maxlength", Integer.toString(configurationSingleton.getMaxWarriorLength()));
+        parser.addConstant("mindistance", Integer.toString(configurationSingleton.getMinWarriorDistance()));
+        parser.addConstant("rounds", Integer.toString(configurationSingleton.getRounds()));
+        parser.addConstant("pspacesize", Integer.toString(configurationSingleton.getpSpaceSize()));
+        parser.addConstant("warriors", Integer.toString(configurationSingleton.getNumWarriors()));
+        return parser;
+    }
+
+
     /**
      * main function and loop for jMARS. Runs the battles and handles display.
      */
     public void run() {
-        HashMap<String, Integer> statistic = new HashMap<>();
-        Date startTime;
-        Date endTime;
-        double roundTime;
         Date tStartTime;
         Date tEndTime;
         double totalTime;
         int totalCycles = 0;
-        tStartTime = new Date();
-        startTime = new Date();
+
+
         if (configurationSingleton.isUseGui())
         {
             coreDisplay.clear();
         }
-        for (int roundNum = 0; roundNum < configurationSingleton.getRounds(); roundNum++) {
-            int cycleNum = 0;
-            for (; cycleNum < configurationSingleton.getCycles(); cycleNum++) {
-                for (int warRun = 0; warRun < configurationSingleton.getRunWarriors(); warRun++) {
-                    StepReport stats = MARS.step();
-                    stats.warrior.numProc = stats.numProc;
-                    if (stats.wDeath) {
-                        stats.warrior.Alive = false;
-                        configurationSingleton.setRunWarriors(configurationSingleton.getRunWarriors() - 1);
-                        ArrayList<WarriorObj> tmp = new ArrayList<>();
-                        for (int warIdx = 0; warIdx < warriors.length; warIdx++)
+
+        tStartTime = new Date();
+        HashMap<String, Integer> statistic = runRounds(totalCycles);
+
+        tEndTime = new Date();
+        totalTime = ((double) tEndTime.getTime() - (double) tStartTime.getTime()) / 1000;
+        System.out.println("Total time=" + totalTime + " Total Cycles=" + totalCycles + " avg. time/cycle=" + (totalTime / totalCycles));
+        System.out.println("Survivor in how many rounds:");
+        for (String name : statistic.keySet())
+        {
+            System.out.println("  " + name + ": " + statistic.get(name));
+        }
+    }
+
+    private int runCycles(){
+        int cycleNum = 0;
+        for (; cycleNum < configurationSingleton.getCycles(); cycleNum++) {
+            for (int warRun = 0; warRun < configurationSingleton.getRunWarriors(); warRun++) {
+                StepReport stats = MARS.step();
+                stats.warrior.numProc = stats.numProc;
+                if (stats.wDeath) {
+                    stats.warrior.Alive = false;
+                    configurationSingleton.setRunWarriors(configurationSingleton.getRunWarriors() - 1);
+                    ArrayList<WarriorObj> tmp = new ArrayList<>();
+                    for (int warIdx = 0; warIdx < warriors.length; warIdx++)
+                    {
+                        if (warIdx != warRun)
                         {
-                            if (warIdx != warRun)
-                            {
-                                tmp.add(warriors[warIdx]);
-                            }
+                            tmp.add(warriors[warIdx]);
                         }
-                        warriors = tmp.toArray(new WarriorObj[] { });
-                        break;
                     }
-                    notifyStepListeners(stats);
-                }
-                notifyCycleListeners(cycleNum);
-                repaint();
-                if (configurationSingleton.getRunWarriors() <= configurationSingleton.getMinWarriors()) {
+                    warriors = tmp.toArray(new WarriorObj[] { });
                     break;
                 }
+                notifyStepListeners(stats);
             }
+            notifyCycleListeners(cycleNum);
+            repaint();
+            if (configurationSingleton.getRunWarriors() <= configurationSingleton.getMinWarriors()) {
+                break;
+            }
+        }
+        return cycleNum;
+    }
+
+    private HashMap<String, Integer> runRounds(int totalCycles){
+        HashMap<String, Integer> statistic = new HashMap<>();
+        Date startTime;
+        Date endTime;
+        double roundTime;
+
+
+        startTime = new Date();
+
+        for (int roundNum = 0; roundNum < configurationSingleton.getRounds(); roundNum++) {
+
+            int cycleNum = runCycles();
+
             for (int warIdx = 0; warIdx < warriors.length; warIdx++)
             {
                 String name = warriors[warIdx].getName();
@@ -228,14 +262,7 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
                 coreDisplay.clear();
             }
         }
-        tEndTime = new Date();
-        totalTime = ((double) tEndTime.getTime() - (double) tStartTime.getTime()) / 1000;
-        System.out.println("Total time=" + totalTime + " Total Cycles=" + totalCycles + " avg. time/cycle=" + (totalTime / totalCycles));
-        System.out.println("Survivor in how many rounds:");
-        for (String name : statistic.keySet())
-        {
-            System.out.println("  " + name + ": " + statistic.get(name));
-        }
+        return statistic;
     }
 
     /**
