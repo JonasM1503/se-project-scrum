@@ -271,6 +271,7 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
     void loadWarriors() {
         warriors = new WarriorObj[allWarriors.length];
         System.arraycopy(allWarriors, 0, warriors, 0, allWarriors.length);
+        configurationSingleton.setRunWarriors(configurationSingleton.getNumWarriors());
         int[] location = new int[warriors.length];
 
         if (!MARS.loadWarrior(warriors[0], 0)) {
