@@ -30,7 +30,6 @@ package corewars.jmars;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
-import java.net.URL;
 import java.io.*;
 
 import corewars.jmars.marsVM.*;
@@ -51,14 +50,14 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
             {Color.gray, Color.darkGray}};
 
     // Application specific variables
-    String args[];
-    static Frame myFrame;
-    static jMARS myApp;
+    //String args[];
+    //static Frame myFrame;
+   // static jMARS myApp;
 
     static Thread myThread;
     static boolean exitFlag;
 
-    ConfigurationSingleton confSing;
+    ConfigurationSingleton configurationSingleton;
 
     WarriorObj allWarriors[];
     WarriorObj warriors[];
@@ -87,41 +86,40 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
             System.out.println("usage: jMARS [options] warrior1.red [warrior2.red ...]");
             return;
         }
-        myFrame = new Frame("jMARS");
+        Frame myFrame = new Frame("jMARS");
         myFrame.setSize(new Dimension(1200, 900));
-        myApp = new jMARS();
-        myApp.args = args;
+        jMARS myApp = new jMARS();
         myFrame.add(myApp);
         myFrame.addWindowListener(myApp);
         myFrame.show();
-        myApp.applicationInit();
+        myApp.applicationInit(args);
     }
 
     /**
      * Initialization function for the application.
      */
-    void applicationInit() {
-        confSing = confSing.getInstance();
+    void applicationInit(String[] args) {
+        configurationSingleton = configurationSingleton.getInstance();
 
-        Vector wArgs = confSing.setAllConfigurations(args);
+        Vector wArgs = configurationSingleton.setAllConfigurations(args);
 
         Assembler parser = new corewars.jmars.assembler.icws94p.ICWS94p();
-        parser.addConstant("coresize", Integer.toString(confSing.getCoreSize()));
-        parser.addConstant("maxprocesses", Integer.toString(confSing.getMaxProc()));
-        parser.addConstant("maxcycles", Integer.toString(confSing.getCoreSize()));
-        parser.addConstant("maxlength", Integer.toString(confSing.getMaxWarriorLength()));
-        parser.addConstant("mindistance", Integer.toString(confSing.getMinWarriorDistance()));
-        parser.addConstant("rounds", Integer.toString(confSing.getRounds()));
-        parser.addConstant("pspacesize", Integer.toString(confSing.getpSpaceSize()));
-        parser.addConstant("warriors", Integer.toString(confSing.getNumWarriors()));
-        allWarriors = new WarriorObj[confSing.getNumWarriors()];
+        parser.addConstant("coresize", Integer.toString(configurationSingleton.getCoreSize()));
+        parser.addConstant("maxprocesses", Integer.toString(configurationSingleton.getMaxProc()));
+        parser.addConstant("maxcycles", Integer.toString(configurationSingleton.getCoreSize()));
+        parser.addConstant("maxlength", Integer.toString(configurationSingleton.getMaxWarriorLength()));
+        parser.addConstant("mindistance", Integer.toString(configurationSingleton.getMinWarriorDistance()));
+        parser.addConstant("rounds", Integer.toString(configurationSingleton.getRounds()));
+        parser.addConstant("pspacesize", Integer.toString(configurationSingleton.getpSpaceSize()));
+        parser.addConstant("warriors", Integer.toString(configurationSingleton.getNumWarriors()));
+        allWarriors = new WarriorObj[configurationSingleton.getNumWarriors()];
 
-        for (int i = 0; i < confSing.getNumWarriors(); i++) {
+        for (int i = 0; i < configurationSingleton.getNumWarriors(); i++) {
             try {
                 FileInputStream wFile = new FileInputStream(args[(((Integer) wArgs.elementAt(i)).intValue())]);
                 try {
                     parser.parseWarrior(wFile);
-                    if (parser.length() > confSing.getMaxWarriorLength()) {
+                    if (parser.length() > configurationSingleton.getMaxWarriorLength()) {
                         System.out.println("Error: warrior " + args[(((Integer) wArgs.elementAt(i)).intValue())] + " to large");
                         System.exit(0);
                     }
@@ -129,7 +127,7 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
                     allWarriors[i].setName(parser.getName());
                     allWarriors[i].setAuthor(parser.getAuthor());
                     allWarriors[i].Alive = true;
-                    allWarriors[i].initPSpace(confSing.getpSpaceSize());
+                    allWarriors[i].initPSpace(configurationSingleton.getpSpaceSize());
                     allWarriors[i].setPCell(0, -1);
                 } catch (AssemblerException ae) {
                     System.out.println("Error parsing warrior file " + args[(((Integer) wArgs.elementAt(i)).intValue())]);
@@ -144,17 +142,17 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
                 System.exit(0);
             }
         }
-        if (confSing.isUseGui())
+        if (configurationSingleton.isUseGui())
         {
-            coreDisplay = new CoreDisplay(this, this, confSing.getCoreSize(), 100);
+            coreDisplay = new CoreDisplay(this, this, configurationSingleton.getCoreSize(), 100);
         }
         roundCycleCounter = new RoundCycleCounter(this, this);
         validate();
         repaint();
         update(getGraphics());
-        MARS = new MarsVM(confSing.getCoreSize(), confSing.getMaxProc());
+        MARS = new MarsVM(configurationSingleton.getCoreSize(), configurationSingleton.getMaxProc());
         loadWarriors();
-        confSing.setMinWarriors((confSing.getNumWarriors() == 1) ? 0 : 1);
+        configurationSingleton.setMinWarriors((configurationSingleton.getNumWarriors() == 1) ? 0 : 1);
         myThread = new Thread(this);
         myThread.setPriority(Thread.NORM_PRIORITY - 1);
         myThread.start();
@@ -175,19 +173,19 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
         int totalCycles = 0;
         tStartTime = new Date();
         startTime = new Date();
-        if (confSing.isUseGui())
+        if (configurationSingleton.isUseGui())
         {
             coreDisplay.clear();
         }
-        for (int roundNum = 0; roundNum < confSing.getRounds(); roundNum++) {
+        for (int roundNum = 0; roundNum < configurationSingleton.getRounds(); roundNum++) {
             int cycleNum = 0;
-            for (; cycleNum < confSing.getCycles(); cycleNum++) {
-                for (int warRun = 0; warRun < confSing.getRunWarriors(); warRun++) {
+            for (; cycleNum < configurationSingleton.getCycles(); cycleNum++) {
+                for (int warRun = 0; warRun < configurationSingleton.getRunWarriors(); warRun++) {
                     StepReport stats = MARS.step();
                     stats.warrior.numProc = stats.numProc;
                     if (stats.wDeath) {
                         stats.warrior.Alive = false;
-                        confSing.setRunWarriors(confSing.getRunWarriors() - 1);
+                        configurationSingleton.setRunWarriors(configurationSingleton.getRunWarriors() - 1);
                         ArrayList<WarriorObj> tmp = new ArrayList<>();
                         for (int warIdx = 0; warIdx < warriors.length; warIdx++)
                         {
@@ -203,7 +201,7 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
                 }
                 notifyCycleListeners(cycleNum);
                 repaint();
-                if (confSing.getRunWarriors() <= confSing.getMinWarriors()) {
+                if (configurationSingleton.getRunWarriors() <= configurationSingleton.getMinWarriors()) {
                     break;
                 }
             }
@@ -225,7 +223,7 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
             }
             MARS.reset();
             loadWarriors();
-            if (confSing.isUseGui())
+            if (configurationSingleton.isUseGui())
             {
                 coreDisplay.clear();
             }
@@ -252,18 +250,18 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
             System.out.println("ERROR: could not load warrior 1.");
         }
 
-        for (int i = 1, r = 0; i < confSing.getNumWarriors(); i++) {
+        for (int i = 1, r = 0; i < configurationSingleton.getNumWarriors(); i++) {
             boolean validSpot;
             do {
                 validSpot = true;
-                r = (int) (Math.random() * confSing.getCoreSize());
+                r = (int) (Math.random() * configurationSingleton.getCoreSize());
 
-                if (r < confSing.getMinWarriorDistance() || r > (confSing.getCoreSize() - confSing.getMinWarriorDistance())) {
+                if (r < configurationSingleton.getMinWarriorDistance() || r > (configurationSingleton.getCoreSize() - configurationSingleton.getMinWarriorDistance())) {
                     validSpot = false;
                 }
 
                 for (int j = 0; j < location.length; j++) {
-                    if (r < (confSing.getMinWarriorDistance() + location[j]) && r > (confSing.getMinWarriorDistance() + location[j])) {
+                    if (r < (configurationSingleton.getMinWarriorDistance() + location[j]) && r > (configurationSingleton.getMinWarriorDistance() + location[j])) {
                         validSpot = false;
                     }
                 }
