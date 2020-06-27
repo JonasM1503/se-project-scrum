@@ -37,7 +37,7 @@ public class jMARSTest
     @Test
     public void testDwarf2vsImp() throws InterruptedException {
         jMARS.main(new String[] { "war/dwarf2.red", "war/imp.red" });
-        Thread.sleep(500); // Wait until all war rounds are finished ;-)
-        assertTrue(copyOut.getTrimmedContent().endsWith("Imp: 10"), "Wrong statistic result: <" + copyOut.getTrimmedContent() + ">");
+        Thread.sleep(5000); // Wait until all war rounds are finished ;-)
+        assertTrue(copyOut.getTrimmedContent().endsWith("Dwarf: 10"), "Wrong statistic result: <" + copyOut.getTrimmedContent() + ">");
     }
 }

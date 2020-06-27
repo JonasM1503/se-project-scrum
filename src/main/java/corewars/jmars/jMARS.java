@@ -69,6 +69,8 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
     Vector cycleListeners;
     Vector roundListeners;
 
+    int totalCycles;
+
     public jMARS() {
         stepListeners = new Vector();
         cycleListeners = new Vector();
@@ -183,7 +185,7 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
         }
 
         tStartTime = new Date();
-        HashMap<String, Integer> statistic = runRounds(totalCycles);
+        HashMap<String, Integer> statistic = runRounds();
 
         tEndTime = new Date();
         totalTime = ((double) tEndTime.getTime() - (double) tStartTime.getTime()) / 1000;
@@ -226,7 +228,7 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
         return cycleNum;
     }
 
-    private HashMap<String, Integer> runRounds(int totalCycles){
+    private HashMap<String, Integer> runRounds(){
         HashMap<String, Integer> statistic = new HashMap<>();
         Date startTime;
         Date endTime;
