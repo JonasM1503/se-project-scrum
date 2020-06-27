@@ -110,48 +110,9 @@ public class jMARS extends Panel implements Runnable, FrontEndManager {
 
         Vector wArgs = configurationSingleton.setAllConfigurations(args);
 
-        Assembler parser = new corewars.jmars.assembler.icws94p.ICWS94p();
-        parser.addConstant("coresize", Integer.toString(configurationSingleton.getCoreSize()));
-        parser.addConstant("maxprocesses", Integer.toString(configurationSingleton.getMaxProc()));
-        parser.addConstant("maxcycles", Integer.toString(configurationSingleton.getCoreSize()));
-        parser.addConstant("maxlength", Integer.toString(configurationSingleton.getMaxWarriorLength()));
-        parser.addConstant("mindistance", Integer.toString(configurationSingleton.getMinWarriorDistance()));
-        parser.addConstant("rounds", Integer.toString(configurationSingleton.getRounds()));
-        parser.addConstant("pspacesize", Integer.toString(configurationSingleton.getpSpaceSize()));
-        parser.addConstant("warriors", Integer.toString(configurationSingleton.getNumWarriors()));
+        Assembler parser = initParser();
 
         getAllWarriors(parser, wArgs, args);
-
-        allWarriors = new WarriorObj[configurationSingleton.getNumWarriors()];
-
-        for (int i = 0; i < configurationSingleton.getNumWarriors(); i++) {
-            try {
-                FileInputStream wFile = new FileInputStream(args[(((Integer) wArgs.elementAt(i)).intValue())]);
-                try {
-                    parser.parseWarrior(wFile);
-                    if (parser.length() > configurationSingleton.getMaxWarriorLength()) {
-                        System.out.println("Error: warrior " + args[(((Integer) wArgs.elementAt(i)).intValue())] + " to large");
-                        System.exit(0);
-                    }
-                    allWarriors[i] = new WarriorObj(parser.getWarrior(), parser.getStart(), wColors[i % numDefinedColors][0], wColors[i % numDefinedColors][1]);
-                    allWarriors[i].setName(parser.getName());
-                    allWarriors[i].setAuthor(parser.getAuthor());
-                    allWarriors[i].Alive = true;
-                    allWarriors[i].initPSpace(configurationSingleton.getpSpaceSize());
-                    allWarriors[i].setPCell(0, -1);
-                } catch (AssemblerException ae) {
-                    System.out.println("Error parsing warrior file " + args[(((Integer) wArgs.elementAt(i)).intValue())]);
-                    System.out.println(ae.toString());
-                    System.exit(0);
-                } catch (IOException ioe) {
-                    System.out.println("IO error while parsing warrior file " + args[(((Integer) wArgs.elementAt(i)).intValue())]);
-                    System.exit(0);
-                }
-            } catch (FileNotFoundException e) {
-                System.out.println("Could not find warrior file " + args[(((Integer) wArgs.elementAt(i)).intValue())]);
-                System.exit(0);
-            }
-        }
 
         if (configurationSingleton.isUseGui())
         {
@@ -201,6 +162,19 @@ public class jMARS extends Panel implements Runnable, FrontEndManager {
                 System.exit(0);
             }
         }
+    }
+
+    private Assembler initParser(){
+        Assembler parser = new corewars.jmars.assembler.icws94p.ICWS94p();
+        parser.addConstant("coresize", Integer.toString(configurationSingleton.getCoreSize()));
+        parser.addConstant("maxprocesses", Integer.toString(configurationSingleton.getMaxProc()));
+        parser.addConstant("maxcycles", Integer.toString(configurationSingleton.getCoreSize()));
+        parser.addConstant("maxlength", Integer.toString(configurationSingleton.getMaxWarriorLength()));
+        parser.addConstant("mindistance", Integer.toString(configurationSingleton.getMinWarriorDistance()));
+        parser.addConstant("rounds", Integer.toString(configurationSingleton.getRounds()));
+        parser.addConstant("pspacesize", Integer.toString(configurationSingleton.getpSpaceSize()));
+        parser.addConstant("warriors", Integer.toString(configurationSingleton.getNumWarriors()));
+        return parser;
     }
 
     /**
