@@ -30,6 +30,7 @@ package corewars.jmars;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.*;
+import java.net.URL;
 import java.io.*;
 
 import corewars.jmars.marsVM.*;
@@ -45,9 +46,9 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
     // constants
     static final int numDefinedColors = 4;
     static final Color wColors[][] = {{Color.green, Color.yellow},
-                                      {Color.red, Color.magenta},
-                                      {Color.cyan, Color.blue},
-                                      {Color.gray, Color.darkGray}};
+            {Color.red, Color.magenta},
+            {Color.cyan, Color.blue},
+            {Color.gray, Color.darkGray}};
 
     // Application specific variables
     String args[];
@@ -55,7 +56,7 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
     static jMARS myApp;
 
     // Common variables
-    static boolean useGui = false;
+    boolean useGui = false;
     int maxProc;
     int pSpaceSize;
     int coreSize;
@@ -91,26 +92,23 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
      * Starting function for the application. It sets up a frame and adds the
      * applet to it.
      *
-     * @param java.lang.String[] a - array of command line arguments
+     * @param args java.lang.String[] a - array of command line arguments
      */
     public static void main(String args[]) {
         if (args.length == 0) {
             System.out.println("usage: jMARS [options] warrior1.red [warrior2.red ...]");
             return;
         }
+        myFrame = new Frame("jMARS");
+        myFrame.setSize(new Dimension(1200, 900));
         myApp = new jMARS();
         myApp.args = args;
+        myFrame.add(myApp);
+        myFrame.addWindowListener(myApp);
+        myFrame.show();
         myApp.applicationInit();
-        if (useGui)
-        {
-            myFrame = new Frame("jMARS");
-            myFrame.setSize(new Dimension(1200, 900));
-            myFrame.add(myApp);
-            myFrame.addWindowListener(myApp);
-            myFrame.show();
-        }
     }
-    
+
     /**
      * Initialization function for the application.
      */
@@ -200,7 +198,9 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
             }
         }
         if (useGui)
+        {
             coreDisplay = new CoreDisplay(this, this, coreSize, 100);
+        }
         roundCycleCounter = new RoundCycleCounter(this, this);
         validate();
         repaint();
@@ -229,7 +229,9 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
         tStartTime = new Date();
         startTime = new Date();
         if (useGui)
+        {
             coreDisplay.clear();
+        }
         for (int roundNum = 0; roundNum < rounds; roundNum++) {
             int cycleNum = 0;
             for (; cycleNum < cycles; cycleNum++) {
@@ -277,7 +279,9 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
             MARS.reset();
             loadWarriors();
             if (useGui)
+            {
                 coreDisplay.clear();
+            }
         }
         tEndTime = new Date();
         totalTime = ((double) tEndTime.getTime() - (double) tStartTime.getTime()) / 1000;
@@ -328,7 +332,7 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
     /**
      * update the display
      *
-     * @param java.awt.Graphics g - Graphics context
+     * @param g java.awt.Graphics g - Graphics context
      */
     public void update(Graphics g) {
         paintComponents(g);
@@ -338,7 +342,7 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
     /**
      * register an object to receive step results.
      *
-     * @param StepListener - object to register
+     * @param l StepListener - object to register
      */
     public void registerStepListener(StepListener l) {
         stepListeners.addElement(l);
@@ -347,7 +351,7 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
     /**
      * register an object to receive cycle results.
      *
-     * @param CycleListener - object to register
+     * @param c CycleListener - object to register
      */
     public void registerCycleListener(CycleListener c) {
         cycleListeners.addElement(c);
@@ -356,7 +360,7 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
     /**
      * register an object to receive round results.
      *
-     * @param RoundListener - object to register
+     * @param r RoundListener - object to register
      */
     public void registerRoundListener(RoundListener r) {
         roundListeners.addElement(r);
