@@ -50,12 +50,7 @@ public class jMARS extends Panel implements Runnable, FrontEndManager {
             {Color.gray, Color.darkGray}};
 
     // Application specific variables
-    //String args[];
-    //static Frame myFrame;
-   // static jMARS myApp;
-
     static Thread myThread;
-    static boolean exitFlag;
 
     ConfigurationSingleton configurationSingleton;
 
@@ -174,7 +169,6 @@ public class jMARS extends Panel implements Runnable, FrontEndManager {
         return parser;
     }
 
-
     /**
      * main function and loop for jMARS. Runs the battles and handles display.
      */
@@ -183,7 +177,6 @@ public class jMARS extends Panel implements Runnable, FrontEndManager {
         Date tEndTime;
         double totalTime;
         int totalCycles = 0;
-
 
         if (configurationSingleton.isUseGui())
         {
@@ -239,7 +232,6 @@ public class jMARS extends Panel implements Runnable, FrontEndManager {
         Date startTime;
         Date endTime;
         double roundTime;
-
 
         startTime = new Date();
 
@@ -366,6 +358,4 @@ public class jMARS extends Panel implements Runnable, FrontEndManager {
             j.roundResults(round);
         }
     }
-
-
 }
