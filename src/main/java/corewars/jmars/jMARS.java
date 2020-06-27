@@ -40,7 +40,7 @@ import corewars.jmars.assembler.*;
  * jMARS is a corewars interpreter in which programs (warriors) battle in the
  * memory of a virtual machine (the MARS) and try to disable the other program.
  */
-public class jMARS extends Panel implements Runnable, WindowListener, FrontEndManager {
+public class jMARS extends Panel implements Runnable, FrontEndManager {
 
     // constants
     static final int numDefinedColors = 4;
@@ -92,8 +92,9 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
         Frame myFrame = new Frame("jMARS");
         myFrame.setSize(new Dimension(1200, 900));
         jMARS myApp = new jMARS();
+        AppliationWindow myApplicationWindow = new AppliationWindow();
         myFrame.add(myApp);
-        myFrame.addWindowListener(myApp);
+        myFrame.addWindowListener(myApplicationWindow);
         myFrame.show();
         myApp.applicationInit(args);
     }
@@ -108,6 +109,26 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
 
         Assembler parser = initParser();
 
+        getAllWarriors(parser, wArgs, args);
+
+        if (configurationSingleton.isUseGui())
+        {
+            coreDisplay = new CoreDisplay(this, this, configurationSingleton.getCoreSize(), 100);
+        }
+        roundCycleCounter = new RoundCycleCounter(this, this);
+        validate();
+        repaint();
+        update(getGraphics());
+        MARS = new MarsVM(configurationSingleton.getCoreSize(), configurationSingleton.getMaxProc());
+        loadWarriors();
+        configurationSingleton.setMinWarriors((configurationSingleton.getNumWarriors() == 1) ? 0 : 1);
+        myThread = new Thread(this);
+        myThread.setPriority(Thread.NORM_PRIORITY - 1);
+        myThread.start();
+        return;
+    }
+
+    private void getAllWarriors(Assembler parser, Vector wArgs, String[] args){
         allWarriors = new WarriorObj[configurationSingleton.getNumWarriors()];
 
         for (int i = 0; i < configurationSingleton.getNumWarriors(); i++) {
@@ -138,21 +159,6 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
                 System.exit(0);
             }
         }
-        if (configurationSingleton.isUseGui())
-        {
-            coreDisplay = new CoreDisplay(this, this, configurationSingleton.getCoreSize(), 100);
-        }
-        roundCycleCounter = new RoundCycleCounter(this, this);
-        validate();
-        repaint();
-        update(getGraphics());
-        MARS = new MarsVM(configurationSingleton.getCoreSize(), configurationSingleton.getMaxProc());
-        loadWarriors();
-        configurationSingleton.setMinWarriors((configurationSingleton.getNumWarriors() == 1) ? 0 : 1);
-        myThread = new Thread(this);
-        myThread.setPriority(Thread.NORM_PRIORITY - 1);
-        myThread.start();
-        return;
     }
 
     private Assembler initParser(){
@@ -254,7 +260,7 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
             System.out.println(roundNum+1 + ". Round time=" + roundTime + " Cycles=" + cycleNum + " avg. time/cycle=" + (roundTime / cycleNum));
             startTime = new Date();
             totalCycles += cycleNum;
-            if (exitFlag) {
+            if (AppliationWindow.exitFlag) {
                 break;
             }
             MARS.reset();
@@ -361,54 +367,5 @@ public class jMARS extends Panel implements Runnable, WindowListener, FrontEndMa
         }
     }
 
-    /**
-     * Invoked when a window is in the process of being closed. The close
-     * operation can be overridden at this point.
-     */
-    public void windowClosing(WindowEvent e) {
-        exitFlag = true;
-        System.exit(0);
-    }
 
-    /**
-     * Invoked when a window has been opened.
-     */
-    public void windowOpened(WindowEvent e) {
-
-    }
-
-    /**
-     * Invoked when a window has been closed.
-     */
-    public void windowClosed(WindowEvent e) {
-
-    }
-
-    /**
-     * Invoked when a window is iconified.
-     */
-    public void windowIconified(WindowEvent e) {
-
-    }
-
-    /**
-     * Invoked when a window is de-iconified.
-     */
-    public void windowDeiconified(WindowEvent e) {
-
-    }
-
-    /**
-     * Invoked when a window is activated.
-     */
-    public void windowActivated(WindowEvent e) {
-
-    }
-
-    /**
-     * Invoked when a window is de-activated.
-     */
-    public void windowDeactivated(WindowEvent e) {
-
-    }
 }
