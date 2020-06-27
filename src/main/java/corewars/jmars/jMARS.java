@@ -80,6 +80,7 @@ public class jMARS extends Panel implements Runnable, FrontEndManager {
      */
     public static void main(String args[]) {
         Scanner input = new Scanner(System.in);
+        AppliationWindow myWindow = new AppliationWindow();
         String inputString;
 
         while (args.length == 0) {
@@ -87,19 +88,8 @@ public class jMARS extends Panel implements Runnable, FrontEndManager {
             inputString = input.nextLine();
             args = inputString.split("\\s");
         }
-        createFrame(args);
+        myWindow.createFrame(args);
 
-    }
-
-    static void createFrame(String[] args) {
-        Frame myFrame = new Frame("jMARS");
-        myFrame.setSize(new Dimension(1200, 900));
-        jMARS myApp = new jMARS();
-        AppliationWindow myApplicationWindow = new AppliationWindow();
-        myFrame.add(myApp);
-        myFrame.addWindowListener(myApplicationWindow);
-        myFrame.show();
-        myApp.applicationInit(args);
     }
 
     /**
@@ -118,10 +108,13 @@ public class jMARS extends Panel implements Runnable, FrontEndManager {
         {
             coreDisplay = new CoreDisplay(this, this, configurationSingleton.getCoreSize(), 100);
         }
+
         roundCycleCounter = new RoundCycleCounter(this, this);
+
         validate();
         repaint();
         update(getGraphics());
+
         MARS = new MarsVM(configurationSingleton.getCoreSize(), configurationSingleton.getMaxProc());
         loadWarriors();
         configurationSingleton.setMinWarriors((configurationSingleton.getNumWarriors() == 1) ? 0 : 1);
