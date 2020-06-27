@@ -79,10 +79,13 @@ public class jMARS extends Panel implements Runnable, FrontEndManager {
      * @param args java.lang.String[] a - array of command line arguments
      */
     public static void main(String args[]) {
+        Scanner input = new Scanner(System.in);
+        String inputString;
 
-        if (args.length == 0) {
-            System.out.println("usage: jMARS [options] warrior1.red [warrior2.red ...]");
-            return;
+        while (args.length == 0) {
+            System.out.println("Please enter a valid input (e.g. war\\dwarf2.red war\\imp.red)");
+            inputString = input.nextLine();
+            args = inputString.split("\\s");
         }
         createFrame(args);
 
@@ -107,28 +110,19 @@ public class jMARS extends Panel implements Runnable, FrontEndManager {
 
         Vector wArgs = configurationSingleton.setAllConfigurations(args);
 
-        Assembler parser = initParser();
 
-        getAllWarriors(parser, wArgs, args);
+        Assembler parser = new corewars.jmars.assembler.icws94p.ICWS94p();
+        parser.addConstant("coresize", Integer.toString(configurationSingleton.getCoreSize()));
+        parser.addConstant("maxprocesses", Integer.toString(configurationSingleton.getMaxProc()));
+        parser.addConstant("maxcycles", Integer.toString(configurationSingleton.getCoreSize()));
+        parser.addConstant("maxlength", Integer.toString(configurationSingleton.getMaxWarriorLength()));
+        parser.addConstant("mindistance", Integer.toString(configurationSingleton.getMinWarriorDistance()));
+        parser.addConstant("rounds", Integer.toString(configurationSingleton.getRounds()));
+        parser.addConstant("pspacesize", Integer.toString(configurationSingleton.getpSpaceSize()));
+        parser.addConstant("warriors", Integer.toString(configurationSingleton.getNumWarriors()));
 
-        if (configurationSingleton.isUseGui())
-        {
-            coreDisplay = new CoreDisplay(this, this, configurationSingleton.getCoreSize(), 100);
-        }
-        roundCycleCounter = new RoundCycleCounter(this, this);
-        validate();
-        repaint();
-        update(getGraphics());
-        MARS = new MarsVM(configurationSingleton.getCoreSize(), configurationSingleton.getMaxProc());
-        loadWarriors();
-        configurationSingleton.setMinWarriors((configurationSingleton.getNumWarriors() == 1) ? 0 : 1);
-        myThread = new Thread(this);
-        myThread.setPriority(Thread.NORM_PRIORITY - 1);
-        myThread.start();
-        return;
-    }
 
-    private void getAllWarriors(Assembler parser, Vector wArgs, String[] args){
+
         allWarriors = new WarriorObj[configurationSingleton.getNumWarriors()];
 
         for (int i = 0; i < configurationSingleton.getNumWarriors(); i++) {
@@ -159,20 +153,25 @@ public class jMARS extends Panel implements Runnable, FrontEndManager {
                 System.exit(0);
             }
         }
+
+        if (configurationSingleton.isUseGui())
+        {
+            coreDisplay = new CoreDisplay(this, this, configurationSingleton.getCoreSize(), 100);
+        }
+        roundCycleCounter = new RoundCycleCounter(this, this);
+        validate();
+        repaint();
+        update(getGraphics());
+        MARS = new MarsVM(configurationSingleton.getCoreSize(), configurationSingleton.getMaxProc());
+        loadWarriors();
+        configurationSingleton.setMinWarriors((configurationSingleton.getNumWarriors() == 1) ? 0 : 1);
+        myThread = new Thread(this);
+        myThread.setPriority(Thread.NORM_PRIORITY - 1);
+        myThread.start();
+        return;
     }
 
-    private Assembler initParser(){
-        Assembler parser = new corewars.jmars.assembler.icws94p.ICWS94p();
-        parser.addConstant("coresize", Integer.toString(configurationSingleton.getCoreSize()));
-        parser.addConstant("maxprocesses", Integer.toString(configurationSingleton.getMaxProc()));
-        parser.addConstant("maxcycles", Integer.toString(configurationSingleton.getCoreSize()));
-        parser.addConstant("maxlength", Integer.toString(configurationSingleton.getMaxWarriorLength()));
-        parser.addConstant("mindistance", Integer.toString(configurationSingleton.getMinWarriorDistance()));
-        parser.addConstant("rounds", Integer.toString(configurationSingleton.getRounds()));
-        parser.addConstant("pspacesize", Integer.toString(configurationSingleton.getpSpaceSize()));
-        parser.addConstant("warriors", Integer.toString(configurationSingleton.getNumWarriors()));
-        return parser;
-    }
+
 
     /**
      * main function and loop for jMARS. Runs the battles and handles display.
@@ -182,6 +181,7 @@ public class jMARS extends Panel implements Runnable, FrontEndManager {
         Date tEndTime;
         double totalTime;
         int totalCycles = 0;
+        HashMap<String, Integer> statistic;
 
         if (configurationSingleton.isUseGui())
         {
@@ -189,12 +189,14 @@ public class jMARS extends Panel implements Runnable, FrontEndManager {
         }
 
         tStartTime = new Date();
-        HashMap<String, Integer> statistic = runRounds();
+        statistic = runRounds();
 
         tEndTime = new Date();
         totalTime = ((double) tEndTime.getTime() - (double) tStartTime.getTime()) / 1000;
+
         System.out.println("Total time=" + totalTime + " Total Cycles=" + totalCycles + " avg. time/cycle=" + (totalTime / totalCycles));
         System.out.println("Survivor in how many rounds:");
+
         for (String name : statistic.keySet())
         {
             System.out.println("  " + name + ": " + statistic.get(name));
